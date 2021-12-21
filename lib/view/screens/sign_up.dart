@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:form_demo/data/local_database/database_helper.dart';
 import 'package:form_demo/view/widgets/button.dart';
 import 'package:form_demo/view/widgets/textfield_widget.dart';
 import 'package:form_demo/view_model/sign_up_view_model.dart';
@@ -13,8 +12,6 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-
-
   @override
   Widget build(BuildContext context) {
     final state = Get.put(SignUpViewModel());
@@ -50,54 +47,22 @@ class _SignUpState extends State<SignUp> {
                   validator: (v) => state.validateEmail(v!),
                   obscureText: false,
                   keyboardType: TextInputType.emailAddress,
-
                   labelText: 'Email'),
               const SizedBox(height: 32),
-
               ButtonWidget(
                   name: 'Submit',
                   onClicked: () {
                     state.singUpUser();
                   }),
-
               const SizedBox(height: 16),
-              _queryButton(),
+              ButtonWidget(name: "Query", onClicked: (){
+                state.queryData();
+              }),
               const SizedBox(height: 16),
-
-
             ],
           ),
         ),
       ),
     );
   }
-
-
-
-
-
-
-
-
 }
-
-Widget _queryButton() => Builder(builder: (context) {
-      return MaterialButton(
-        onPressed: () async {
-          List<Map<String, dynamic>> queryRows =
-              await DatabaseHelper.instance.queryAllRows();
-          print(queryRows);
-        },
-        height: 50,
-        minWidth: 100,
-        color: Colors.blue,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-        child: const Text(
-          'Query',
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-      );
-    });
-
-

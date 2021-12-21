@@ -76,4 +76,12 @@ class SignUpViewModel extends GetxController {
       update();
     }
   }
+
+
+
+  void queryData()async{
+    List<Map<String, dynamic>> queryRows =
+        await DatabaseHelper.instance.queryAllRows();
+    print(queryRows);
+  }
 }
