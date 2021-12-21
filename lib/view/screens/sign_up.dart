@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:form_demo/data/local_database/database_helper.dart';
 import 'package:form_demo/view/widgets/button.dart';
-
-
+import 'package:form_demo/view/widgets/textfield_widget.dart';
+import 'package:form_demo/view_model/sign_up_view_model.dart';
+import 'package:get/get.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -13,14 +14,10 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
 
-  final formKey = GlobalKey<FormState>();
-  String username = '';
-  String email = '';
-  String password = '';
 
   @override
   Widget build(BuildContext context) {
-
+    final state = Get.put(SignUpViewModel());
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -28,22 +25,44 @@ class _SignUpState extends State<SignUp> {
           centerTitle: true,
         ),
         body: Form(
-          key: formKey,
+          key: state.formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              buildUsername(),
+              TextFieldWidget(
+                  onSaved: (value) => state.name = value.toString(),
+                  validator: (v) => state.validateName(v!),
+                  keyboardType: TextInputType.number,
+                  obscureText: false,
+                  controller: state.nameController,
+                  labelText: 'Name'),
               const SizedBox(height: 16),
-              buildEmail(),
+              TextFieldWidget(
+                  onSaved: (value) => state.password = value.toString(),
+                  validator: (v) => state.validatePassword(v!),
+                  obscureText: true,
+                  controller: state.passwordController,
+                  labelText: 'Password'),
+              const SizedBox(height: 16),
+              TextFieldWidget(
+                  onSaved: (value) => state.email = value.toString(),
+                  validator: (v) => state.validateEmail(v!),
+                  obscureText: false,
+                  keyboardType: TextInputType.emailAddress,
+
+                  labelText: 'Email'),
               const SizedBox(height: 32),
-              buildPassword(),
-              const SizedBox(height: 32),
-              buildSubmit(),
+
+              ButtonWidget(
+                  name: 'Submit',
+                  onClicked: () {
+                    state.singUpUser();
+                  }),
+
               const SizedBox(height: 16),
               _queryButton(),
               const SizedBox(height: 16),
-              _updateButton()
 
 
             ],
@@ -56,137 +75,29 @@ class _SignUpState extends State<SignUp> {
 
 
 
-Widget buildUsername() => TextFormField(
-  decoration: const InputDecoration(
-    labelText: 'Username',
-    border:OutlineInputBorder(),
-
-  ),
-  validator: (value) {
-    if (value!.length < 4) {
-      return 'Enter at least 4 characters';
-    } else {
-      return null;
-    }
-  },
-  maxLength: 30,
-  onSaved: (value) => setState(() => username = value!),
-);
-
-Widget buildEmail() => TextFormField(
-  decoration: const InputDecoration(
-    labelText: 'Email',
-    border: OutlineInputBorder(),
-  ),
-  validator: (value) {
-    const pattern = r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)';
-    final regExp = RegExp(pattern);
-
-    if (value!.isEmpty) {
-      return 'Enter an email';
-    } else if (!regExp.hasMatch(value)) {
-      return 'Enter a valid email';
-    } else {
-      return null;
-    }
-  },
-  keyboardType: TextInputType.emailAddress,
-  onSaved: (value) => setState(() => email = value!),
-);
-
-Widget buildPassword() => TextFormField(
-  decoration: const InputDecoration(
-    labelText: 'Password',
-    border: OutlineInputBorder(),
-  ),
-  validator: (value) {
-    if (value!.length < 7) {
-      return 'Password must be at least 7 characters long';
-    } else {
-      return null;
-    }
-  },
-  onSaved: (value) => setState(() => password = value!),
-  keyboardType: TextInputType.visiblePassword,
-  obscureText: true,
-);
-
-Widget buildSubmit() => Builder(
-  builder: (context) => ButtonWidget(
-    text: 'Submit',
-    onClicked: () async{
-      final isValid = formKey.currentState!.validate();
 
 
-      if (isValid) {
-        formKey.currentState!.save();
 
-        final message =
-            'Username: $username\nPassword: $password\nEmail: $email';
-        final snackBar = SnackBar(
-          content: Text(
-            message,
-            style: const TextStyle(fontSize: 20),
-          ),
-          backgroundColor: Colors.green,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        var i = await DatabaseHelper.instance..insert({
-          DatabaseHelper.columnName : username,
-          DatabaseHelper.columnEmail: email,
-          DatabaseHelper.columnPassword: password
 
-        });
-
-        print(i);
-      }
-    },
-  ),
-);
 }
 
-Widget _queryButton() => Builder(builder: (context){
-  return MaterialButton(onPressed: () async{
-    List<Map<String,dynamic>> queryRows = await DatabaseHelper.instance.queryAllRows();
-    print(queryRows);
+Widget _queryButton() => Builder(builder: (context) {
+      return MaterialButton(
+        onPressed: () async {
+          List<Map<String, dynamic>> queryRows =
+              await DatabaseHelper.instance.queryAllRows();
+          print(queryRows);
+        },
+        height: 50,
+        minWidth: 100,
+        color: Colors.blue,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+        child: const Text(
+          'Query',
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
+      );
+    });
 
 
-  },
-    height: 50,
-    minWidth: 100,
-    color: Colors.blue,
-    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(30.0) ),
-    child: const Text('Query',
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 18
-      ),
-    ),
-
-  );
-
-});
-
-
-
-Widget _updateButton() => Builder(builder: (context){
-  return MaterialButton(onPressed: () async{
-    List<Map<String,dynamic>> queryRows = await DatabaseHelper.instance.queryAllRows();
-    print(queryRows);
-
-
-  },
-    height: 50,
-    minWidth: 100,
-    color: Colors.blue,
-    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(30.0) ),
-    child: const Text('Delete',
-      style: TextStyle(
-          color: Colors.white,
-          fontSize: 18
-      ),
-    ),
-
-  );
-
-});
