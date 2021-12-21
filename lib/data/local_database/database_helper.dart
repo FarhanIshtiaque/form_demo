@@ -13,7 +13,8 @@ class DatabaseHelper {
 
   static const columnId = '_id';
   static const columnName = 'name';
-  static const columnAge = 'age';
+  static const columnEmail = 'email';
+  static const columnPassword = 'password';
 
   // make this a singleton class
   DatabaseHelper._privateConstructor();
@@ -39,9 +40,10 @@ class DatabaseHelper {
   Future _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $table (
-            $columnId INTEGER PRIMARY KEY,
+            $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
             $columnName TEXT NOT NULL,
-            $columnAge INTEGER NOT NULL
+            $columnEmail TEXT NOT NULL,
+            $columnPassword TEXT NOT NULL
           )
           ''');
   }

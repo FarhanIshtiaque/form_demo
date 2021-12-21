@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:form_demo/data/local_database/database_helper.dart';
 import 'package:form_demo/view/widgets/button.dart';
+
 
 
 class SignUp extends StatefulWidget {
@@ -38,6 +40,12 @@ class _SignUpState extends State<SignUp> {
               buildPassword(),
               const SizedBox(height: 32),
               buildSubmit(),
+              const SizedBox(height: 16),
+              _queryButton(),
+              const SizedBox(height: 16),
+              _updateButton()
+
+
             ],
           ),
         ),
@@ -106,9 +114,9 @@ Widget buildPassword() => TextFormField(
 Widget buildSubmit() => Builder(
   builder: (context) => ButtonWidget(
     text: 'Submit',
-    onClicked: () {
+    onClicked: () async{
       final isValid = formKey.currentState!.validate();
-      // FocusScope.of(context).unfocus();
+
 
       if (isValid) {
         formKey.currentState!.save();
@@ -123,8 +131,62 @@ Widget buildSubmit() => Builder(
           backgroundColor: Colors.green,
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        var i = await DatabaseHelper.instance..insert({
+          DatabaseHelper.columnName : username,
+          DatabaseHelper.columnEmail: email,
+          DatabaseHelper.columnPassword: password
+
+        });
+
+        print(i);
       }
     },
   ),
 );
 }
+
+Widget _queryButton() => Builder(builder: (context){
+  return MaterialButton(onPressed: () async{
+    List<Map<String,dynamic>> queryRows = await DatabaseHelper.instance.queryAllRows();
+    print(queryRows);
+
+
+  },
+    height: 50,
+    minWidth: 100,
+    color: Colors.blue,
+    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(30.0) ),
+    child: const Text('Query',
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 18
+      ),
+    ),
+
+  );
+
+});
+
+
+
+Widget _updateButton() => Builder(builder: (context){
+  return MaterialButton(onPressed: () async{
+    List<Map<String,dynamic>> queryRows = await DatabaseHelper.instance.queryAllRows();
+    print(queryRows);
+
+
+  },
+    height: 50,
+    minWidth: 100,
+    color: Colors.blue,
+    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(30.0) ),
+    child: const Text('Delete',
+      style: TextStyle(
+          color: Colors.white,
+          fontSize: 18
+      ),
+    ),
+
+  );
+
+});
